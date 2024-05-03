@@ -29,6 +29,9 @@ app.use('/',UserRouter)
 const PostRouter = require('./routes/postroute')
 app.use('/',PostRouter)
 
+const CommentRouter = require('./routes/commentroute')
+app.use('/',CommentRouter)
+
 app.listen(port , () => { console.log(`port running on http://localhost:${port}`)})
 
 module.exports = app

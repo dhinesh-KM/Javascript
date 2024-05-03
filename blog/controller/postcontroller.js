@@ -57,10 +57,10 @@ const DeletePost = async (req,res) => {
     try{
         const result = await Post.findByIdAndDelete(id)
         if (!result) {
-            return res.status(404).json({'msg': `user with id "${id}" not found.` })
+            return res.status(404).json({'msg': `post with id "${id}" not found.` })
             
         }
-        res.status(200).json({ 'msg': 'User deleted successfully' });
+        res.status(200).json({ 'msg': 'post deleted successfully' });
     }   
     catch(err){
         res.status(500).json({'msg': err.message})
