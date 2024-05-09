@@ -4,6 +4,7 @@ const { ObjectId } = require('mongoose').Types;
 const bcrypt = require('bcrypt')
 const app = require('../app')
 const User = require('../models/user')
+let token;
 
 beforeAll( async() => {
     await mongoose.connection.close()
@@ -12,15 +13,23 @@ beforeAll( async() => {
     const user = await User.create({username:"boomi10", email:"456@gmail.com", password: await bcrypt.hash("654321",10)})
     userid = user._id.toString()
     invalidId = new ObjectId().toHexString();
+    const validpayload ={username:"boomi10", password:"654321"}
+    const res = await request(app)
+        .post('/user/login')
+        .send(validpayload)
+        token = res.body.token
+        console.log(token)
 })
 
 
 
 
 afterAll(async () => {
+    
     await User.deleteMany({}) 
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.close();
+
 });
 
 describe("get/users", () => {
@@ -50,15 +59,36 @@ describe("post/users", () => {
             
     })
 })
+console.log("t1",token)
+describe('login/user', () => {
+    it("should authenticate a valid user", async () => {
+        const validpayload ={username:"boomi10", password:"654321"}
+        const res = await request(app)
+        .post('/user/login')
+        .send(validpayload)
+        token = res.body.token
+        expect(res.statusCode).toEqual(200)
+        
+    })
+    it("should authenticate a invalid user", async () => {
+        const validpayload ={username:"arun10", password:"12456"}
+        const res = await request(app)
+        .post('/user/login')
+        .send(validpayload)
+        expect(res.statusCode).toEqual(404)
+    })
+
+})
+console.log("t2",token)
 
 describe('get/user', () => {
     it("should get a specific user with validid", async () => {
-        const res = await request(app).get(`/user/${userid}`)
+        const res = await request(app).get(`/user/${userid}`).set('Authorization', `Bearer ${token}`);
         expect(res.statusCode).toEqual(200)
         expect(res.body.data.username).toEqual('boomi10')
     })
     it("should get a specific user with invalidid", async () => {
-        const res = await request(app).get(`/user/${invalidId}`)
+        const res = await request(app).get(`/user/${invalidId}`).set('Authorization', `Bearer ${token}`);
         expect(res.statusCode).toEqual(404)
     })
 })
@@ -80,7 +110,7 @@ describe('get/user', () => {
 describe('patch/user', () => {
     it("should partially update a specific user ", async () => {
         const validpayload ={ email:"456@gmail.com"}
-        const res = await request(app).patch(`/user/${userid}`).send(validpayload)
+        const res = await request(app).patch(`/user/${userid}`).send(validpayload).set('Authorization', `Bearer ${token}`);
         expect(res.statusCode).toEqual(200)
         expect(res.body.data.email).toEqual('456@gmail.com')
     })
@@ -88,7 +118,7 @@ describe('patch/user', () => {
 
 describe('delete/user', () => {
     it("should delete a specific user ", async () => {
-        const res = await request(app).delete(`/user/${userid}`)
+        const res = await request(app).delete(`/user/${userid}`).set('Authorization', `Bearer ${token}`);
         expect(res.statusCode).toEqual(200)
     })
 })

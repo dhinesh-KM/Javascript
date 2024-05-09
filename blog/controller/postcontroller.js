@@ -1,12 +1,14 @@
 const  Post  = require('../models/post')
-
+const  Comment  = require('../models/comment')
 
 const CreatePost = async (req, res) => {
-    const {title,content,author} = req.body;
+    const {title,content} = req.body;
+    const author = req.user.userid
+    console.log(author)
     try{
         const post = new Post({title:title,content:content,author:author})
         await post.save()
-        res.status(201).json({'msg': "post created successfully",'data':post})
+        res.status(201).json({'msg': "post created successfully",'data':post.GetPostData()})
     }
     catch(err){
         res.status(500).json({'msg': err.message})
@@ -14,19 +16,19 @@ const CreatePost = async (req, res) => {
 }
 
 const GetAllPost = async (req,res) => {
-    const post = await Post.find()
-    res.status(200).json({'data': post})
+    const post = await Post.find().select('-__v -comments_o')
+    res.status(200).json({'data': post});
 }
+
 
 const GetPost = async (req,res) => {
     const {id} = req.params
-    console.log
     try{
         const post = await Post.findById(id)
         if (!post){
             return res.status(404).json({'msg': `post with id "${id}" not found.` })
         }
-        res.status(200).json({'data':post})
+        res.status(200).json({'data':post.GetPostData()})
     }
     catch(err){
         res.status(500).json({'msg': err.message})
@@ -42,7 +44,8 @@ const PatchPost = async (req,res) => {
         if (!post){
             return res.status(404).json({'msg': `post with id "${id}" not found.` })
         }
-        res.status(200).json({'msg' : 'post updated successfully', 'data': post})
+        await Comment.updateMany({post_o:post._id}, {post: post.title})
+        res.status(200).json({'msg' : 'post updated successfully', 'data': post.GetPostData()})
     }
     catch(err){
         res.status(500).json({'msg': err.message})
@@ -55,11 +58,12 @@ const PatchPost = async (req,res) => {
 const DeletePost = async (req,res) => {
     const {id} = req.params
     try{
-        const result = await Post.findByIdAndDelete(id)
-        if (!result) {
+        const post = await Post.findById(id)
+        if (!post) {
             return res.status(404).json({'msg': `post with id "${id}" not found.` })
             
         }
+        await post.deleteOne()
         res.status(200).json({ 'msg': 'post deleted successfully' });
     }   
     catch(err){
@@ -68,4 +72,4 @@ const DeletePost = async (req,res) => {
 
 }
 
-module.exports = {CreatePost, GetAllPost, GetPost, PatchPost, DeletePost}
+module.exports = {CreatePost, GetAllPost, GetPost, PatchPost, DeletePost, Post}
