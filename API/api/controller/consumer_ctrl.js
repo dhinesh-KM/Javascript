@@ -1,5 +1,5 @@
 const {Consumer} = require('../models/consumer')
-const {consumer_create,consumer_registration_verify_section} = require('../db')
+const {consumer_create,consumer_registration_verify_section} = require('../dboperations')
 
 
 const CreateUser = async (req, res) => {
