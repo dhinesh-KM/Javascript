@@ -1,5 +1,14 @@
 const mongoose = require('mongoose')
 
+const CofferAPIUserSchema = new mongoose.Schema(
+    {
+        user : { type: String},
+        uid : { type: String},
+        password : { type: String},
+        created : { type: Date}
+    }
+)
+
 const CountrySchema = new mongoose.Schema(
     {
         index : {type: String },
@@ -38,7 +47,7 @@ const ConsumerSchema = new mongoose.Schema(
         email_verification_token :{type: String },
         mobile_verification_token :{type: String },
         citizen : [CountrySchema]
-        //profile_completeness = { type: Number }
+        //profile_completeness : { type: Number }
         //otp 
         //keepass_filename 
         //ciphertext :{type: String },
@@ -56,7 +65,7 @@ ConsumerSchema.methods.consumer_fullname = function(){
 
 
 const Consumer = mongoose.model('Consumer', ConsumerSchema)
-
+const CofferAPIUser = mongoose.model('CofferAPIUser', CofferAPIUserSchema)
 
 module.exports = {Consumer}
 

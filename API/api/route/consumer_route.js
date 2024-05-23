@@ -1,12 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const {CreateUser,GetAllUser,VerifyUser} = require('../controller/consumer_ctrl')
-const {validate_payload} = require('../validation/validator')
-const {RegisterSchema,RegisterVerifySchema} = require('../validation/schema')
+const v = require('../validation/validator')
+const s = require('../validation/schema')
 
+
+//router.post('/apilogin', views.Login.as_view()),
 router.get('/all',  GetAllUser)
-router.post('/register', validate_payload(RegisterSchema), CreateUser)
-router.patch('/register/:verify_type/token/:token_type', validate_payload(RegisterVerifySchema), VerifyUser )
+router.post('/register', v.validate_payload(s.RegisterSchema), CreateUser)
+router.patch('/register/:verify_type/token/:token_type', v.validate_payload_url, VerifyUser )
 
 
 module.exports = router 

@@ -27,7 +27,7 @@ app.use(express.json());
 const UserRouter = require('./route/consumer_route')
 app.use('/consumer',UserRouter)
 
-
+ 
 
 app.listen(port , () => { console.log(`port running on http://localhost:${port}`)})
 

@@ -1,27 +1,28 @@
 const {Consumer} = require('../models/consumer')
-const {consumer_create,consumer_registration_verify_section} = require('../dboperations')
+const db = require('../dboperations')
 
 
 const CreateUser = async (req, res) => {
     const data = req.body
     try{
         
-        const result = await consumer_create(data)
+        const result = await db.consumer_create(data)
         const status = result.status
         delete result.status
         res.status(status).json(result)
     }
     catch(err){
         res.status(500).json({'msg': err.message})
-        console.log("error",err.message)
+        console.log("error",err.message,err)
     }
 }
 
 const VerifyUser = async (req, res) => {
     const data = req.body
     const{verify_type,token_type} = req.params
+    
     try{
-        const result = await consumer_registration_verify_section(verify_type,token_type,data)
+        const result = await db.consumer_registration_verify_section(verify_type,token_type,data)
         const status = result.status
         delete result.status
         res.status(status).json(result)
