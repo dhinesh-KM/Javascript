@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const CofferAPIUserSchema = new mongoose.Schema(
     {
@@ -7,7 +7,7 @@ const CofferAPIUserSchema = new mongoose.Schema(
         password : { type: String},
         created : { type: Date}
     }
-)
+);
 
 const CountrySchema = new mongoose.Schema(
     {
@@ -21,7 +21,7 @@ const CountrySchema = new mongoose.Schema(
         alt_phone : {type: String },
         affiliation_countryid : {type: String }
     }
-)
+);
 
 const ConsumerSchema = new mongoose.Schema(
     {
@@ -56,16 +56,43 @@ const ConsumerSchema = new mongoose.Schema(
         //email_hash :{type: String },
         //mobile_hash :{type: String },
     }
-)
+);
 
 
 ConsumerSchema.methods.consumer_fullname = function(){
-    return this.first_name +' '+ this.last_name
-}
+    return this.first_name +' '+ this.last_name;
+};
+
+ConsumerSchema.methods.GetConsumerData = function() {
+    const d = this.dob;
+    return {
+        first_name: this.first_name,
+        middle_name: this.middle_name,
+        last_name: this.last_name,
+        dob: `${d.getDate().toString().padStart(2,0)}/${(d.getMonth() + 1).toString().padStart(2,0) }/${d.getFullYear()}`,
+        email: this.email,
+        mobile: this.mobile,
+        country: this.country,
+        citizen: this.citizen.map(citizen => ({
+            country: citizen.country,
+            affiliation_type: citizen.affiliation_type,
+            mobile_phone: citizen.mobile_phone || "",
+            home_address: citizen.home_address || "",
+            alt_phone: citizen.alt_phone || "",
+            index: citizen.index,
+            work_phone: citizen.work_phone || "",
+            work_address: citizen.work_address || ""
+        })),
+        joined: this.joined,
+        coffer_id: this.coffer_id,
+        email_verified: this.email_verified,
+        mobile_verified: this.mobile_verified,  
+    };
+};
 
 
-const Consumer = mongoose.model('Consumer', ConsumerSchema)
-const CofferAPIUser = mongoose.model('CofferAPIUser', CofferAPIUserSchema)
+const Consumer = mongoose.model('Consumer', ConsumerSchema);
+const CofferAPIUser = mongoose.model('CofferAPIUser', CofferAPIUserSchema);
 
-module.exports = {Consumer}
+module.exports = {Consumer};
 
