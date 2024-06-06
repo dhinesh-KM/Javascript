@@ -28,6 +28,12 @@ const MobileResendSchema = Joi.object(
     }
 )
 
+const TokenSchema = Joi.object(
+    {
+        token : Joi.string().required()
+    }
+)
+
 
 const RegisterSchema = Joi.object(
     {
@@ -65,10 +71,35 @@ const ProfileUpdateSchema = Joi.object(
         new_password : Joi.string(),
         confirm_password : Joi.string().valid(Joi.ref('new_password')).messages({'any.only': 'Passwords does not match.'})
 
-    }
-).with( 'old_password', 'new_password').messages({'object.with': 'new_password is missing' })
- .with( 'old_password', 'confirm_password' ).messages({'object.with': 'confirm_password is missing'})
- .with( 'new_password', ['confirm_password', 'old_password'])
- .with( 'confirm_password', ['old_password', 'new_password']);
+    })
+.when(Joi.object({  old_password: Joi.exist(), new_password: Joi.exist() }), {
+    then: Joi.object({
+        confirm_password: Joi.required()
+    }) })
+    
+.when(Joi.object({ old_password: Joi.exist(), confirm_password: Joi.exist() }), {
+    then: Joi.object({
+        new_password: Joi.required()
+    }) })
 
-module.exports = {RegisterSchema, EmailVerifySchema, EmailResendSchema, MobileResendSchema, MobileVerifySchema, ProfileUpdateSchema}
+.when(Joi.object({ new_password: Joi.exist(), confirm_password: Joi.exist() }), {
+    then: Joi.object({
+        old_password: Joi.required()
+    }) })
+
+.when(Joi.object({ new_password: Joi.exist() }), {
+    then: Joi.object({ old_password: Joi.required(), confirm_password: Joi.required()
+    }) })
+
+.when(Joi.object({ old_password: Joi.exist() }), {
+    then: Joi.object({ confirm_password: Joi.required(), new_password: Joi.required()
+    }) })
+    
+.when(Joi.object({ confirm_password: Joi.exist() }), {
+    then: Joi.object({ old_password: Joi.required(), new_password: Joi.required()
+    })
+});
+
+
+
+module.exports = {RegisterSchema, EmailVerifySchema, EmailResendSchema, MobileResendSchema, MobileVerifySchema, ProfileUpdateSchema, TokenSchema }
