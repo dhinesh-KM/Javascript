@@ -20,6 +20,10 @@ const GetAllUser = async(req,res) => {
     res.status(200).json({'error' : false, 'data': users});
 }
 
+const ForgotPswrd = controller.patch(db.forget)
+
+const ForgotPswrdCheck = controller.patch(db.forget_check)
+
 
 const GetUser = async(req,res,next) => {
     try{const result = await db.get_consumer(req.params);
@@ -34,4 +38,4 @@ const GetUser = async(req,res,next) => {
 
 
 
-module.exports = {CreateUser, GetAllUser, Register_Verify, GetEthinicity, GetBloodgroup, UpdateUser, Update_Verify, GetUser}
+module.exports = {CreateUser, GetAllUser, Register_Verify, GetEthinicity, GetBloodgroup, UpdateUser, Update_Verify, GetUser, ForgotPswrd, ForgotPswrdCheck}

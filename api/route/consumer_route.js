@@ -5,15 +5,18 @@ const v = require('../validation/validator')
 const s = require('../validation/schema')
 
 
-//router.post('/apilogin', views.Login.as_view()),
-router.get('/all',  control.GetAllUser)
-router.post('/register', v.validate_payload(s.RegisterSchema), control.CreateUser)
-router.patch('/register/:verify_type/token/:token_type', v.types_validate, control.Register_Verify )
-router.patch('/:cofferid/profile/update',v.validate_payload(s.ProfileUpdateSchema), control.UpdateUser)
-router.patch('/:cofferid/profile/:verify_type',v.validate_payload(s.TokenSchema) , control.Update_Verify)
-router.get('/:cofferid', control.GetUser)
+//router.post('/apilogin',  views.Login.as_view()), 
+router.get('/all',   control.GetAllUser)
+router.post('/register',  v.validate_payload(s.RegisterSchema),  control.CreateUser)
+router.patch('/register/:verify_type/token/:token_type',  v.types_validate,  control.Register_Verify )
+router.patch('/:cofferid/profile/update', v.validate_payload(s.ProfileUpdateSchema),  control.UpdateUser)
+router.patch('/:cofferid/profile/:verify_type', v.validate_payload(s.TokenSchema) ,  control.Update_Verify)
+router.get('/:cofferid',  control.GetUser)
 
-router.get('/ethinicity', control.GetEthinicity)
-router.get('/bloodgroup', control.GetBloodgroup)
+router.patch('/forgot/:verify_type', v.forget_validator, control.ForgotPswrd)
+router.patch('/forgot/:verify_type/token/:token_type', v.forget_check_validator, control.ForgotPswrdCheck)
+
+router.get('/ethinicity',  control.GetEthinicity)
+router.get('/bloodgroup',  control.GetBloodgroup)
 
 module.exports = router 

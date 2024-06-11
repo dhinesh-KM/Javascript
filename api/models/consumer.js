@@ -64,12 +64,12 @@ ConsumerSchema.methods.consumer_fullname = function(){
 };
 
 ConsumerSchema.methods.GetConsumerData = function() {
-    const d = this.dob;
+    const d = this.dob || "";
     return {
         first_name: this.first_name,
         middle_name: this.middle_name,
         last_name: this.last_name,
-        dob: `${d.getDate().toString().padStart(2,0)}/${(d.getMonth() + 1).toString().padStart(2,0) }/${d.getFullYear()}`,
+        dob: d != "" ? `${d.getDate().toString().padStart(2,0)}/${(d.getMonth() + 1).toString().padStart(2,0) }/${d.getFullYear()}` : "",
         email: this.email,
         mobile: this.mobile,
         country: this.country,

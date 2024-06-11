@@ -1,12 +1,14 @@
-const {Consumer} = require('./models/consumer')
-const crypto = require('crypto')
-const bcrypt = require('bcrypt')
-const utils = require('./utils')
-const {CustomError} = require('./middleware/customerror')
-const {logger} = require('./logger')
-const moment = require('moment')
-
-
+const {Consumer} = require('./models/consumer');
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
+const utils = require('./utils');
+const {CustomError} = require('./middleware/customerror');
+const logger = require('./logger');
+const moment = require('moment');
+const { date } = require('joi');
+const otplib = require('otplib');
+require('dotenv').config();
+let lastgeneratedtime;
 
 
 
@@ -15,7 +17,7 @@ async function generate_cofferid()
     const cid = crypto.randomBytes(8).toString('hex')
     const con = await Consumer.findOne({coffer_id : cid})
     if (con)   
-        return generate_cofferid() 
+        return await generate_cofferid() 
     return cid
 }
 
@@ -126,7 +128,7 @@ async function consumer_registration_verify_section(params,data)
             if (token_type == 'resend')
                 {
                     if (verify_type == 'email')
-                        console.info("VitaGist Personal Email Verification.\nName:", con.consumer_fullname() ,"\ntoken: ",con.email_verification_token);
+                        console.log("VitaGist Personal Email Verification.\nName:", con.consumer_fullname() ,"\ntoken: ",con.email_verification_token);
                     
                     else if (verify_type == 'mobile')
                         console.log("VitaGist Personal Mobile Verification.\nNumber:",`${utils.get_country_phone_code(con.country)} ${con.mobile}`,"\nmsg: ",`Use token ${con.mobile_verification_token} to verify your mobile and get started with DigiCoffer Personal`)
@@ -137,28 +139,6 @@ async function consumer_registration_verify_section(params,data)
                 {
                     token = data['token']
                     return  await email_mobile_verification(con,verify_type,token)
-
-                    /*if (verify_type == 'email')
-                        {
-                            if (token == con.email_verification_token)
-                                {
-                                    con.email_verified = true
-                                    con.email_verification_token = null
-                                }
-                            else
-                                throw new CustomError('please enter a valid token', 400)   
-                        }  
-
-                    else if (verify_type == 'mobile')
-                        {
-                            if (token == con.mobile_verification_token)
-                                {
-                                    con.mobile_verified = true
-                                    con.mobile_verification_token = null
-                                }
-                            else
-                                throw new CustomError('please enter a valid token', 400)
-                        }*/
                 }
         }
     throw new CustomError('Account not found',404)
@@ -175,10 +155,8 @@ async function update_password(con,o_password,n_password)
 
     if(!password)
         throw new CustomError("Invalid old password", 400)
-    con.password = await bcrypt.hash(n_password,10)
 
-    return con
-
+    return await bcrypt.hash(n_password,10)
 }
 
 async function check(data)
@@ -212,9 +190,18 @@ async function consumer_update(params, data)
                     con.dob = moment(data["dob"], "DD-MM-YYYY").format("YYYY-MM-DD");
 
             if ( "old_password" in data)
-                con = await update_password(con,data['old_password'],data['new_password']);
+                con.password = await update_password(con,data['old_password'],data['new_password']);
 
-            if ( "mobile" in data)
+            if("mobile" in data && data["mobile"] != con.mobile)
+                    await notify_mobile(con,data["mobile"])
+                
+
+            if ( "email" in data && data["email"] != con.email )
+                await notify_email(con,data["email"])
+
+                
+
+            /*if ( "mobile" in data)
                 {
                     //case1: mobile verifed user , check saved mobile number not equal to current and mobile verified true to update
                     if (data["mobile"] != con.mobile && con.mobile_verified)
@@ -223,23 +210,28 @@ async function consumer_update(params, data)
                     //case2: mobile not verifed user (email verified user) , check saved mobile number not equal to current
                     else if (data["mobile"] != con.mobile )
                         {
+                            //await notify_mobile(con,data["mobile"])  for both verification
                             await check({mobile:data["mobile"]})
                             con.mobile = data["mobile"] 
                         }
                     //case3: above cases are not it remains unchange 
-                } 
+                } */
 
-            if ( "email" in data)
+            /*if ( "email" in data)
                 {
+                    //case1: email verifed user , check saved email id not equal to current and email verified true to update
                     if (data["email"] != con.email && con.email_verified)
                         await notify_email(con,data["email"])
 
+                    //case2: email not verifed user (mobile verified user) , check saved email number not equal to current
                     else if (data["email"] != con.email )
                         {
+                            //await notify_email(con,data["email"])   for both verification
                             await check({email:data["email"]})
                             con.email = data["email"] 
                         }
-                }
+                    //case3: above cases are not it remains unchange
+                }*/
             
             con.save();
             return {'error': false, 'msg': "profile details updated successfully", 'data': con, 'status': 200 }
@@ -263,13 +255,81 @@ async function get_consumer(params)
     const{cofferid} = params;
 
     const con = await consumer_find({coffer_id:cofferid})
-    console.log(con)
     if (con)
-        
         return {'error': false, 'data': con.GetConsumerData() , 'status': 200 }
 
     throw new CustomError('Account not found',404)
 }
-                
-module.exports = {consumer_create, consumer_registration_verify_section, get_Bloodgroup, get_ethinicity, consumer_update, verify_email_mobile, get_consumer}
+
+function OTP()
+{
+    const otp = otplib.authenticator.generate(process.env.SECRETKEY)
+    lastgeneratedtime = new Date();
+    return otp;
+    
+}
+
+function check_otp(data)
+{
+    console.log(new Date() - lastgeneratedtime, (new Date() - lastgeneratedtime) >= 30000 )
+    if ((new Date() - lastgeneratedtime) >= 60000)
+            throw new CustomError("OTP is expired", 400)
+        
+    else
+        {
+            const otp = otplib.authenticator.check(data, process.env.SECRETKEY);
+            if (otp)
+                return true;
+
+            throw new CustomError("Invalid OTP", 400)
+        }
+}
+
+async function forget(params,data)
+{
+    const con  = await consumer_find({ [`${Object.keys(data)}`] : `${Object.values(data)}`});
+    if(con)
+        {
+            if (params.verify_type == "email" )
+                console.log("VitaGist Personal Password Reset.  \nName:", con.consumer_fullname() ,"\nOTP: ",OTP());
+            else
+                console.log("VitaGist Personal Password Reset.  \nNumber:",`${utils.get_country_phone_code(con.country)} ${con.mobile}`,"\nmsg: ","Use OTP" ,OTP(), "to verify your mobile and get started with DigiCoffer Personal");
+            
+            return {'error': false, 'msg': `A token to reset your password is sent to your ${params.verify_type}. It is valid for 5 mins`, "coffer_id": con.coffer_id, 'status':200}
+        }
+    throw new CustomError('Account not found',404)
+
+}
+
+async function forget_check(params,data)
+{
+    const {verify_type, token_type} = params;
+    const con  = await consumer_find({ coffer_id : data['coffer_id']});
+
+    if(con)
+        {
+            if(token_type == "resend")
+                {
+                    if(verify_type == 'email')
+                        console.log("VitaGist Personal Password Reset.  \nName:", con.consumer_fullname() ,"\nOTP: ",OTP());
+                    else
+                        console.log("VitaGist Personal Password Reset.  \nNumber:",`${utils.get_country_phone_code(con.country)} ${con.mobile}`,"\nmsg: ","Use OTP" ,OTP(), "to verify your mobile and get started with DigiCoffer Personal");
+
+                    return {'error': false, 'msg': `A token to reset your password is sent to your ${params.verify_type}. It expires soon.`, "coffer_id": con.coffer_id, 'status':200};
+
+                }
+            else
+                {
+                    if (check_otp(data["otp"]))
+                        {
+                            con.password = await bcrypt.hash(data["password"],10);
+                            con.save();
+                            return {'error': false, 'msg': "Password reset successful. Please login to access your Coffer.", 'status':200};
+                        }
+                }
+        }
+    throw new CustomError('Account not found',404);
+}
+                 
+module.exports = {consumer_create, consumer_registration_verify_section, get_Bloodgroup, get_ethinicity, consumer_update, verify_email_mobile, get_consumer, forget, forget_check}
 

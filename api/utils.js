@@ -1,5 +1,6 @@
 const { date } = require("joi");
-
+const { CustomError } = require("./middleware/customerror");
+const crypto = require('crypto')
 const DOCHUB_PHONE_CODE = 
     {'Argentina' :'+54', 'Australia' :'+61', 'Austria' :'+43', 'Belgium' :'+32', 'Bosnia' :'+387', 'Brazil' :'+55', 'Bulgaria' :'+359',
     'Canada' :'+1', 'Chile' :'+56', 'China' :'+86', 'Croatia' :'+385', 'Czech Republic' :'+420', 'Denmark' :'+45', 'Estonia' :'+372',
@@ -42,7 +43,6 @@ function get_ethinicity(){
 function get_bloodgroup(){
     return BLOOD_GROUPS
 }
-
 
 
 
