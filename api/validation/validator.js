@@ -14,7 +14,7 @@ function result(req,res,next,value,error)
 
 const validate_payload =  ( schema ) => {
     return (req, res, next) => {
-        const {value,error} = schema.validate(req.body, {abortEarly : false});
+        const {value,error} = schema.validate(req.body, {abortEarly : false,  stripUnknown: true });
 
         //console.log("v:",value,"\ne:",error)
         return result(req,res,next,value,error);
@@ -49,7 +49,7 @@ const types_validate =  (req, res, next) => {
     else if(verify_type == 'mobile')
         schemaToValidate =  token_type == 'resend' ? schema.MobileResendSchema : schema.MobileVerifySchema;
             
-    const {value , error} = schemaToValidate.validate(req.body)
+    const {value , error} = schemaToValidate.validate(req.body, { stripUnknown: true })
     return result(req,res,next,value,error)
 
 }

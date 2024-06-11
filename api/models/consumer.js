@@ -47,8 +47,7 @@ const ConsumerSchema = new mongoose.Schema(
         email_verification_token :{type: String },
         mobile_verification_token :{type: String },
         citizen : [CountrySchema]
-        //profile_completeness : { type: Number }
-        //otp 
+        //profile_completeness : { type: Number } 
         //keepass_filename 
         //ciphertext :{type: String },
         //profilepic_filename :{type: String },
