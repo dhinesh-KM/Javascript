@@ -1,4 +1,4 @@
-const {Consumer} = require('./models/consumer');
+const Consumer = require('./models/consumer');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const utils = require('./utils');
@@ -271,7 +271,7 @@ function OTP()
 
 function check_otp(data)
 {
-    console.log(new Date() - lastgeneratedtime, (new Date() - lastgeneratedtime) >= 30000 )
+    //console.log(new Date() - lastgeneratedtime, (new Date() - lastgeneratedtime) >= 60000 )
     if ((new Date() - lastgeneratedtime) >= 60000)
             throw new CustomError("OTP is expired", 400)
         
