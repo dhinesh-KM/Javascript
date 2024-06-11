@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 (async function connectdb () {
     try{
         logger.info("Connecting to MongoDB...");
-        await mongoose.connect(process.env.DBURL);
+        await mongoose.connect(process.env.DBURL, { autoIndex: false });
         logger.info("connected successfully!!!"); 
     }
     catch(e){
