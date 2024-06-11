@@ -1,4 +1,4 @@
-const {Consumer} = require('../models/consumer');
+const Consumer = require('../models/consumer');
 const db = require('../dboperations');
 const controller = require('../controller/generic_controller');
 
@@ -15,24 +15,15 @@ const GetBloodgroup = controller.get(db.get_Bloodgroup)
 
 const UpdateUser = controller.patch(db.consumer_update);
 
+const ForgotPswrd = controller.patch(db.forget);
+
+const ForgotPswrdCheck = controller.patch(db.forget_check);
+
+const GetUser = controller.get(db.get_consumer);
+
 const GetAllUser = async(req,res) => {
     const users = await Consumer.find().select("-_id -password -__v ");
     res.status(200).json({'error' : false, 'data': users});
-}
-
-const ForgotPswrd = controller.patch(db.forget)
-
-const ForgotPswrdCheck = controller.patch(db.forget_check)
-
-
-const GetUser = async(req,res,next) => {
-    try{const result = await db.get_consumer(req.params);
-    const status = result.status;
-    delete result.status;
-    res.status(status).json(result);}
-    catch(err){
-        next(err);
-    }
 }
 
 

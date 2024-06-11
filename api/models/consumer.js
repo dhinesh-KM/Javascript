@@ -94,5 +94,5 @@ ConsumerSchema.methods.GetConsumerData = function() {
 const Consumer = mongoose.model('Consumer', ConsumerSchema);
 const CofferAPIUser = mongoose.model('CofferAPIUser', CofferAPIUserSchema);
 
-module.exports = {Consumer};
+module.exports = Consumer;
 
