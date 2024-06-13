@@ -57,6 +57,15 @@ const ConsumerSchema = new mongoose.Schema(
     }
 );
 
+const ReminderSchema = new mongoose.Schema(
+    {
+        consumer: { type: mongoose.Schema.Types.ObjectId, ref: 'Consumer'},
+        message: {type: String ,required : true},
+        date : { type: Date ,required : true},
+        created: { type: Date }
+    }
+)
+
 
 ConsumerSchema.methods.consumer_fullname = function(){
     return this.first_name +' '+ this.last_name;
@@ -91,7 +100,9 @@ ConsumerSchema.methods.GetConsumerData = function() {
 
 
 const Consumer = mongoose.model('Consumer', ConsumerSchema);
+const Reminder = mongoose.model('Reminder', ReminderSchema);
+
 const CofferAPIUser = mongoose.model('CofferAPIUser', CofferAPIUserSchema);
 
-module.exports = Consumer;
+module.exports = {Consumer,Reminder};
 

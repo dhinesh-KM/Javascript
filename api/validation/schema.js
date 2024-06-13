@@ -63,7 +63,7 @@ const RegisterSchema = Joi.object(
 ).xor('email','mobile').messages({'object.missing':'Either Email OR Mobile is required'}).options({ stripUnknown: true });
 
 
-const date_validator = (value, helpers) => {
+const dob_validator = (value, helpers) => {
     const date = moment(value, "DD-MM-YYYY");
 
     if (!date.isValid())
@@ -82,7 +82,7 @@ const ProfileUpdateSchema = Joi.object(
         middle_name : Joi.string(),
         email : Joi.string().email().messages({'string.email': 'Invalid email address'}),
         mobile : Joi.string().length(10),
-        dob : Joi.string().custom(date_validator, 'custom date validation'),
+        dob : Joi.string().custom(dob_validator, 'custom dob validation'),
         old_password : Joi.string(),
         new_password : Joi.string(),
         confirm_password : Joi.string().valid(Joi.ref('new_password')).messages({'any.only': 'Passwords does not match.'})
@@ -116,6 +116,25 @@ const ProfileUpdateSchema = Joi.object(
     })
 });
 
+const date_validator = (value, helpers) => {
+    const date = moment(value, "DD-MM-YYYY");
+
+    if (!date.isValid())
+        return helpers.message('Date must be in the format DD-MM-YYYY');
+
+    if ( date.isBefore(moment(), 'day'))
+        return helpers.message("Target date should be a future date");
+
+    return value
+}
+
+const ReminderSchema = Joi.object(
+    {
+        message: Joi.string().required(),
+        date: Joi.string().required().custom(date_validator, 'custom date validation')
+    }
+);
 
 
-module.exports = {RegisterSchema, EmailVerifySchema, EmailResendSchema, MobileResendSchema, MobileVerifySchema, ProfileUpdateSchema, TokenSchema, PasswordResendSchema, passwordverifySchema }
+
+module.exports = {RegisterSchema, EmailVerifySchema, EmailResendSchema, MobileResendSchema, MobileVerifySchema, ProfileUpdateSchema, TokenSchema, PasswordResendSchema, passwordverifySchema, ReminderSchema }

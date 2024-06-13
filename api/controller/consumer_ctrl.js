@@ -1,4 +1,4 @@
-const Consumer = require('../models/consumer');
+const {Consumer} = require('../models/consumer');
 const db = require('../dboperations');
 const controller = require('../controller/generic_controller');
 
@@ -21,6 +21,8 @@ const ForgotPswrdCheck = controller.patch(db.forget_check);
 
 const GetUser = controller.get(db.get_consumer);
 
+const CreateReminder = controller.p_create(db.reminder_create);
+
 const GetAllUser = async(req,res) => {
     const users = await Consumer.find().select("-_id -password -__v ");
     res.status(200).json({'error' : false, 'data': users});
@@ -29,4 +31,4 @@ const GetAllUser = async(req,res) => {
 
 
 
-module.exports = {CreateUser, GetAllUser, Register_Verify, GetEthinicity, GetBloodgroup, UpdateUser, Update_Verify, GetUser, ForgotPswrd, ForgotPswrdCheck}
+module.exports = {CreateUser, GetAllUser, Register_Verify, GetEthinicity, GetBloodgroup, UpdateUser, Update_Verify, GetUser, ForgotPswrd, ForgotPswrdCheck, CreateReminder}

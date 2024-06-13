@@ -238,10 +238,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResetPasswordSuccessResponse'
-    
+                
+                
+  /reminder/{cofferid}:
+    post:
+      tags:
+        - "Reminders"
+      parameters:
+        - in: "path"
+          name: "cofferid"
+          required: true
+          schema:
+            type: "string"
+            example: "939d55f9ef8908ba"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/reminder'
               
+      responses:
+        '200':
+          description: "reminder creation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderResponse'
+        
+    get:
+      tags:
+        - "Reminders"
+      parameters:
+        - in: "path"
+          name: "cofferid"
+          required: true
+          schema:
+            type: "string"
+            example: "939d55f9ef8908ba"
+              
+      responses:
+        '200':
+          description: "Get reminder"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderGetResponse'
+           
+           
+  /reminder/{cofferid}/{reminderid}:     
+    delete:
+      tags:
+        - "Reminders"
+      parameters:
+        - in: "path"
+          name: "cofferid"
+          required: true
+          schema:
+            type: "string"
+            example: "939d55f9ef8908ba"
+        
+        - in: "path"
+          name: "reminderid"
+          required: true
+          schema:
+            type: "string"
+            example: "66697a5922fb9154859e1222"
       
-      
+      responses:
+        '200':
+          description: "Get reminder"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderdelteResponse'
           
           
 
@@ -249,43 +318,6 @@ paths:
 
 components:
   schemas:
-    citizenship:
-      type: "object"
-      properties:
-        index:
-          type: "string"
-          example: "12345"
-        country:
-          type: "string"
-          example: "USA"
-        affiliation_type:
-          type: "string"
-          example: "Employee"
-        work_address:
-          type: "string"
-          example: "123 Work St, Worktown, WT 54321"
-        home_address:
-          type: "string"
-          example: "456 Home St, Hometown, HT 67890"
-        mobile_phone:
-          type: "string"
-          example: "1234567890"
-        work_phone:
-          type: "string"
-          example: "0987654321"
-        alt_phone:
-          type: "string"
-          example: "1122334455"
-        affiliation_countryid:
-          type: "string"
-          example: "US"
-      required:
-        - "country"
-        - "affiliation_type"
-        - "mobile_phone"
-        - "home_address"
-        
-        
     profile:
       type: "object"
       properties:
@@ -298,6 +330,9 @@ components:
         last_name:
           type: "string"
           example: "Doe"
+        dob:
+          type: "string"
+          example: "12-05-2023"
         email:
           type: "string"
           format: "email"
@@ -499,6 +534,84 @@ components:
         msg:
           type: "string"
           example: "consumer creted successfully"
+          
+    reminder:
+      type: "object"
+      properties:
+        message:
+          type: "string"
+          example: "reminder for last date to apply"
+          
+        date:
+          type: "string"
+          example: "21-06-2024"
+      required:
+        - "message"
+        - "date"
+        
+    ReminderResponse:
+      type: "object"
+      properties:
+        error:
+          type: "boolean"
+          example: false
+        msg:
+          type: "string"
+          example: "Reminder creted successfully"
+          
+    ReminderGetResponse:
+      type: "object"
+      properties:
+        error:
+          type: "boolean"
+          example: false
+        
+        data:
+          type: object
+          properties:
+            reminders:
+              type: array
+              items:
+                type: object
+              example: []
+              
+    ReminderdelteResponse:
+      type: "object"
+      properties:
+        error:
+          type: "boolean"
+          example: false
+        msg:
+          type: "string"
+          example: "Reminder deleted successfully"
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
           
     
 

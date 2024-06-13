@@ -14,6 +14,23 @@ const create = (method) => {
     }
 }
 
+const p_create = (method) => {
+    return async (req, res, next) => {
+        const data = req.body
+        const params = req.params;
+        try{
+            
+            const result = await method(params,data)
+            const status = result.status
+            delete result.status
+            res.status(status).json(result)
+        }
+        catch(err){
+            next(err)
+        }
+    }
+}
+
 const get = (method) => {
     return async(req,res,next) => {
         const params = req.params;
@@ -48,4 +65,4 @@ const patch = (method) => {
 }
 
 
-module.exports = {create, get, patch};
+module.exports = {create, get, patch, p_create};

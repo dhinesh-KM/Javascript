@@ -1,4 +1,4 @@
-const Consumer = require('./models/consumer');
+const {Consumer,Reminder} = require('./models/consumer');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const utils = require('./utils');
@@ -330,6 +330,25 @@ async function forget_check(params,data)
         }
     throw new CustomError('Account not found',404);
 }
+
+
+async function reminder_create(params,data)
+{
+    console.log("///////////////////")
+    const {cofferid} = params;
+    
+    const con  = await consumer_find({ coffer_id : cofferid});
+    console.log(cofferid,con)
+
+    if(con)
+        {
+            data['date'] = moment(data["date"], "DD-MM-YYYY").format("YYYY-MM-DD");
+            await Reminder.create(data);
+            return { "error": false, "msg": "Reminder creted successfully" , "status":200}
+        }
+    throw new CustomError('Account not found',404);
+}
+
                  
-module.exports = {consumer_create, consumer_registration_verify_section, get_Bloodgroup, get_ethinicity, consumer_update, verify_email_mobile, get_consumer, forget, forget_check}
+module.exports = {consumer_create, consumer_registration_verify_section, get_Bloodgroup, get_ethinicity, consumer_update, verify_email_mobile, get_consumer, forget, forget_check, reminder_create}
 
